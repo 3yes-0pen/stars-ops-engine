@@ -1,4 +1,11 @@
-# "2027 Star Ratings Data Table - CAI (Oct 8 2026)"
+### "2027 Star Ratings Data Table - CAI (Oct 8 2026)"
+**File:** '<2027 Star Ratings Data Table - CAI (Oct 8 2026)>' (format: .csv)
+**Used in project:**
+**Grain/Key:** 
+**Rows:**
+**Header:** TBD (title row? domain row above measure names?)
+**Quirks:** key column is `CONTRACT_ID` here, `Contract Number` in other files (verified: header listings)
+
 ## Contract Number| Organization Marketing Name | Contract Name | Parent Organization | Puerto Rico Only | Part C FAC	Part D MA-PD FAC | Part D PDP FAC	Overall FAC
 
 # "2027 Star Ratings Data Table - Domain Stars (Oct 8 2026)"
