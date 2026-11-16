@@ -1,0 +1,131 @@
+DIAGNOSE 2027: why do published stars differ from score + cut-point bands?
+   Rows tested (numeric score AND published star): 20,748
+   Matched: 20,108 (96.9%)   Mismatched: 640
+   Rows with no single band found (should be 0): 0
+   Contracts flagged as disaster-affected (>= 25% on either column): 114 of 685 tested
+   Check the scale: disaster_2024_pct runs 0 to 100 (assumed to be percent, 0-100)
+   Check the scale: disaster_2025_pct runs 0 to 100 (assumed to be percent, 0-100)
+   'CAHPS-type' = C03, C21, C22, C23, C24, C25, C26, D05, D06
+
+==============================================================================
+1. HOW OFTEN DOES THE RECOMPUTED STAR MATCH THE PUBLISHED STAR?
+==============================================================================
+   Group             Rows  Matched  Mismatched  Match rate
+   --------------  ------  -------  ----------  ----------
+   CAHPS-type       4,012    3,507         505       87.4%
+   Other measures  16,736   16,601         135       99.2%
+
+   How to read: CAHPS-type stars come from percentile ranks and significance
+      tests (Tech Notes), so a score alone cannot fully determine them. Judge
+      your cut-point logic on 'Other measures'.
+
+==============================================================================
+2. DO MISMATCHES CLUSTER IN DISASTER-FLAGGED CONTRACTS?
+==============================================================================
+   Group           Contract       Rows  Mismatched  Match rate
+   --------------  -----------  ------  ----------  ----------
+   CAHPS-type      not flagged   3,290         397       87.9%
+   CAHPS-type      flagged         722         108       85.0%
+   Other measures  not flagged  13,653           8       99.9%
+   Other measures  flagged       3,083         127       95.9%
+
+   How to read: Of 135 mismatches in 'Other measures', 127 are in flagged
+      contracts. That is a correlation; the mechanism (published = better of
+      this year and last year) still needs testing with 2026 data.
+
+==============================================================================
+3. WHICH WAY DO THE MISMATCHES GO?
+==============================================================================
+   Group           Mismatches  Published HIGHER  Published LOWER
+   --------------  ----------  ----------------  ---------------
+   CAHPS-type             505        56 (11.1%)      449 (88.9%)
+   Other measures         135       114 (84.4%)       21 (15.6%)
+
+   How to read: Opposite directions in the two groups point to different
+      mechanisms. 'Higher' fits a better-of disaster rule; 'lower' fits extra
+      conditions that withhold stars.
+
+==============================================================================
+4. HOW BIG ARE THE MISMATCHES? (stars apart)
+==============================================================================
+   Group           1 star  2 stars  3+ stars
+   --------------  ------  -------  --------
+   CAHPS-type         504        1         0
+   Other measures     126        6         3
+
+   How to read: 1-star gaps can come from rounding or edge cases. Gaps of 2+
+      stars need a rule, not rounding.
+
+==============================================================================
+5. WHICH MEASURES HAVE THE MOST MISMATCHES? (Other measures only)
+==============================================================================
+   Code  Measure                             Mismatches  Flagged  Not flagged
+   ----  ----------------------------------  ----------  -------  -----------
+   C06   Monitoring Physical Activity                16       16            0
+   D08   Medication Adherence for Diabetes           16       16            0
+   C14   Controlling High Blood Pressure             13       13            0
+   C13   Kidney Health Evaluation for Patie          12       12            0
+   C15   Reducing the Risk of Falling                11       11            0
+   D07   MPF Price Accuracy                          10       10            0
+   C20   Follow-up after Emergency Departme           9        9            0
+   C30   Plan Makes Timely Decisions about            8        3            5
+   C02   Colorectal Cancer Screening                  6        6            0
+   C31   Reviewing Appeals Decisions                  6        3            3
+   C05   Improving or Maintaining Mental He           5        5            0
+   C12   Diabetes Care – Blood Sugar Contro           5        5            0
+
+   How to read: A measure whose mismatches are mostly NOT flagged points to
+      something other than the disaster rule. Appeals measures (C30, C31) are
+      one candidate (scaled reductions in the Tech Notes).
+
+==============================================================================
+6. LARGEST DIFFERENCES (2+ stars), look at these by hand first
+==============================================================================
+   Contract  Measure  Score  Published  Computed  Gap  Flagged
+   --------  -------  -----  ---------  --------  ---  -------
+   H0504     C30        99%          2         4   -2  yes    
+   H0504     C31       100%          3         5   -2  yes    
+   H4937     C30        98%          1         4   -3  no     
+   H4937     C31        97%          1         3   -2  no     
+   H5087     C30        95%          1         3   -2  yes    
+   H5087     C31       100%          3         5   -2  yes    
+   H5928     C30       100%          2         5   -3  yes    
+   H5928     C31       100%          2         5   -3  yes    
+   H7607     C24         84          3         1   +2  yes    
+   H8854     C30        97%          1         3   -2  no     
+
+   How to read: Gap = published minus computed. The same contract showing the
+      same gap on both appeals measures would fit a shared reduction.
+
+==============================================================================
+7. OTHER-MEASURE MISMATCHES IN CONTRACTS NOT FLAGGED AS DISASTER-AFFECTED
+==============================================================================
+   8 rows (listing up to 25)
+
+   Contract  Measure  Score  Published  Computed  Gap
+   --------  -------  -----  ---------  --------  ---
+   H4869     C30        79%          1         2   -1
+   H4937     C30        98%          1         4   -3
+   H6743     C30       100%          4         5   -1
+   H8764     C30       100%          4         5   -1
+   H8854     C30        97%          1         3   -2
+   H4937     C31        97%          1         3   -2
+   H6743     C31        91%          1         2   -1
+   H8764     C31        99%          3         4   -1
+
+   How to read: These are the cases the disaster flag does not explain. Count
+      them by measure before guessing a cause.
+
+==============================================================================
+8. CAUTION: SCORE EXACTLY ON A BAND EDGE
+==============================================================================
+   Group           Score          Rows  Match rate
+   --------------  -----------  ------  ----------
+   CAHPS-type      not on edge   1,967       94.1%
+   CAHPS-type      on edge       2,045       81.0%
+   Other measures  not on edge  11,851       99.1%
+   Other measures  on edge       4,885       99.3%
+
+   How to read: Whole-number scores land on band edges often, so being on an
+      edge explains little on its own.
+
