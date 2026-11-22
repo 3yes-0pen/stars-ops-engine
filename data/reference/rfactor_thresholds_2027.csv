@@ -1,0 +1,9 @@
+table,new_measure,improvement,percentile,value,source_doc,source_page
+8,Yes,With,65,3.545455,tech_notes_2027,16
+8,Yes,With,85,3.871795,tech_notes_2027,16
+8,Yes,Without,65,3.602941,tech_notes_2027,16
+8,Yes,Without,85,3.895522,tech_notes_2027,16
+9,Yes,With,30,1.036449,tech_notes_2027,17
+9,Yes,With,70,1.378508,tech_notes_2027,17
+9,Yes,Without,30,0.999552,tech_notes_2027,17
+9,Yes,Without,70,1.385046,tech_notes_2027,17

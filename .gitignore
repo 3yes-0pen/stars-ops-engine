@@ -3,5 +3,6 @@ raw/
 data/interim/
 *.duckdb
 __pycache__/
+.pytest_cache/
 .ipynb_checkpoints/
 .DS_Store
