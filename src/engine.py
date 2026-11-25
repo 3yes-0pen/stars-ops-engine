@@ -57,3 +57,40 @@ def cai_value(category):
     if len(row) != 1:
         raise ValueError(f"CAI category {category} not found exactly once")
     return float(row["cai_value"].iloc[0])
+
+
+def _run(stars, weights, th, cai):
+    """One pass: mean, variance, reward factor, CAI, rounding."""
+    codes = [c for c in stars if c in weights]
+    s = [stars[c] for c in codes]
+    w = [weights[c] for c in codes]
+    mean = weighted_mean(s, w)
+    var = weighted_variance(s,w)
+    r = reward_factor(mean, var, th["mean_p65"], th["mean_p85"], th["var_p30"], th["var_p70"])
+    raw = mean + r + cai
+    return {"mean": mean, "variance": var, "r": r, "raw": raw, "rating": round_half(raw)}
+
+
+IMPROVEMENT = ("C29", "D04")
+SHARED_DROPPED = ("D02", "D03")  # same data as C27/C28, counted once (Tech Notes p. 13)
+
+
+def overall(stars, weights, thresholds, cai):
+    """MA-PD overall rating for one contract (Tech Notes pp. 13-17).
+
+    stars: dict of measure code -> published star (missing or NaN = unrated)
+    weights: dict of measure code -> weight (Attachment G)
+    thresholds: {"with": {...}, "without": {...}}, each holding
+        mean_p65, mean_p85, var_p30, var_p70
+    cai: the CAI value for this contract (already looked up)
+    Returns a dict: rating, raw, chosen ("with" or "without"), plus both runs' details.
+    """
+    base = {c: v for c, v in stars.items() if c not in SHARED_DROPPED}
+    without = _run({c: v for c, v in base.items() if c not in IMPROVEMENT}, weights, thresholds["without"], cai)
+    with_ = _run(base, weights, thresholds["with"], cai)
+    if without["rating"] >= 4 and with_["rating"] < without["rating"]:    # 4+ rule (p. 15).  
+        chosen, final = "without", without
+    else:
+        chosen, final = "with", with_
+    return {"rating": final["rating"], "raw": final["raw"], "chosen": chosen,
+            "without": without, "with": with_}

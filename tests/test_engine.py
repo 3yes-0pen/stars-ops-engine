@@ -8,6 +8,7 @@ from engine import (
     weighted_variance,
     reward_factor,
     cai_value,
+    overall
 )
 
 M65, M85 = 3.545455, 3.871795
@@ -74,3 +75,46 @@ def test_reward_factor(mean, var, expected):
 def test_cai_value_first_and_last_category():
     assert cai_value(1) == pytest.approx(-0.069659)
     assert cai_value(7) == pytest.approx(0.108248)
+
+
+WEIGHTS = {"C01": 1, "C04": 3, "C21": 2, "C29": 5}
+NO_REWARD = {"mean_p65": 99, "mean_p85": 99.5, "var_p30": 0.0, "var_p70": 0.0}
+THRESHOLDS = {"with": NO_REWARD, "without": NO_REWARD}
+
+
+def test_overall_uses_without_run_when_it_is_4_plus_and_with_is_lower():
+    stars = {"C01": 4, "C04": 4, "C21": 4, "C29": 1}
+    result = overall(stars, WEIGHTS, THRESHOLDS, cai=0.0)
+    assert result["rating"] == 4.0
+    assert result["chosen"] == "without"
+    assert result["with"]["rating"] == 2.5
+
+
+def test_overall_uses_with_run_when_it_is_higher():
+    stars = {"C01": 4, "C04": 4, "C21": 4, "C29": 5}
+    result = overall(stars, WEIGHTS, THRESHOLDS, cai=0.0)
+    assert result["rating"] == 4.5
+    assert result["chosen"] == "with"
+
+
+def test_overall_uses_with_run_when_without_is_below_4():
+    stars = {"C01": 3, "C04": 3, "C21": 3, "C29": 1}
+    result = overall(stars, WEIGHTS, THRESHOLDS, cai=0.0)
+    assert result["rating"] == 2.0
+    assert result["chosen"] == "with"
+
+
+def test_overall_counts_shared_measures_once():
+    weights = {**WEIGHTS, "C27": 2, "D02": 2}
+    stars = {"C01": 4, "C04": 4, "C21": 4, "C27": 2, "D02": 2, "C29": 4}
+    result = overall(stars, weights, THRESHOLDS, cai=0.0)
+    assert result["with"]["mean"] == pytest.approx((4 + 12 + 8 + 4 + 20) / 13)
+
+
+def test_overall_without_run_drops_both_improvement_measures():
+    weights = {**WEIGHTS, "D04": 5}
+    stars = {"C01": 4, "C04": 4, "C21": 4, "C29": 1, "D04": 1}
+    result = overall(stars, weights, THRESHOLDS, cai=0.0)
+    assert result["without"]["mean"] == pytest.approx(4.0)
+    assert result["rating"] == 4.0
+    assert result["chosen"] == "without"
