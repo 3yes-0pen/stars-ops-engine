@@ -10,6 +10,7 @@ REFERENCE = ROOT / "data" / "reference"
 
 DISASTER_COLS = ["disaster_2024_pct", "disaster_2025_pct"]
 DISASTER_THRESHOLD = 25  # percent of members in a FEMA Individual Assistance area (Tech Notes pp. 8-9)
+PR_ADHERENCE = ("D08", "D09", "D10")  # weight set to zero for Puerto Rico-only contracts (Attachment G, p. 137)
 
 
 def load_weights():
@@ -59,18 +60,25 @@ def load_stars():
     return {cid: dict(zip(g["measure_code"], g["star"])) for cid, g in facts.groupby("contract_id")}
 
 
-def run_contract(contract_id, contracts, stars, weights, thresholds):
-    """Run the engine for one contract; returns overall()'s result."""
+def run_contract(contract_id, contracts, stars, weights, thresholds, pr_rule=False):
+    """Run the engine for one contract; returns overall()'s result.
+
+    pr_rule=True applies the Puerto Rico-only rule (adherence weights set to zero).
+    """
+    if pr_rule and contracts.loc[contract_id, "pr_only"]:
+        weights = {**weights, **{code: 0 for code in PR_ADHERENCE}}
     cai = cai_value(contracts.loc[contract_id, "fac_overall"])
     return overall(stars[contract_id], weights, thresholds, cai)
 
 
-def run_all(contracts, stars, weights, thresholds, ids):
+def run_all(contracts, stars, weights, thresholds, ids, pr_rule=False):
     """Run the engine over many contracts. One row per contract, my results only (no published rating)."""
     rows = []
     for cid in ids:
-        res = run_contract(cid, contracts, stars, weights, thresholds)
+        res = run_contract(cid, contracts, stars, weights, thresholds, pr_rule)
         used = res[res["chosen"]]
         rows.append({"contract_id": cid, "rating": res["rating"], "raw": res["raw"],
-                     "chosen": res["chosen"], "r": used["r"], "mean": used["mean"]})
+                     "chosen": res["chosen"], "r": used["r"], "mean": used["mean"],
+                     "mean_with": res["with"]["mean"], "r_with": res["with"]["r"],
+                     "raw_with": res["with"]["raw"]})
     return pd.DataFrame(rows).set_index("contract_id")
